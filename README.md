@@ -1,4 +1,4 @@
-# Project UAS Algoritma dan Pemrograman - [KASIR TOKOO]
+# Project UAS PEMEROGRAMAN DASAR T1H - [KASIR TOKO]
 
 ## Daftar Anggota Kelompok
 
