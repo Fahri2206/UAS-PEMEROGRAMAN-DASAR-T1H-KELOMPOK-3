@@ -151,3 +151,143 @@ function hitungNilaiStok(daftar: Produk[]): number {
   }
   return total;
 }
+
+// Fungsi dengan return number:
+function biayaTambahan(kategori: string, ukuran: string): number {
+  let biaya: number = 0; // biaya tambahan awal
+  switch (kategori) {
+    case "Kaos":
+      switch (ukuran) {
+        case "S":
+        case "M":
+        case "L":
+          biaya += 0; // tanpa biaya tambahan
+          break;
+        case "XL":
+          biaya += 10000; // XL kaos +Rp10.000
+          break;
+        default:
+          gagal(`Ukuran "${ukuran}" tidak valid!`);
+      }
+      break;
+    case "Kemeja":
+      switch (ukuran) {
+        case "S":
+        case "M":
+        case "L":
+          biaya += 0;
+          break;
+        case "XL":
+          biaya += 15000; // XL kemeja +Rp15.000
+          break;
+        default:
+          gagal(`Ukuran "${ukuran}" tidak valid!`);
+      }
+      break;
+    case "Jaket":
+      switch (ukuran) {
+        case "S":
+        case "M":
+        case "L":
+          biaya += 0;
+          break;
+        case "XL":
+          biaya += 20000; // XL jaket +Rp20.000
+          break;
+        default:
+          gagal(`Ukuran "${ukuran}" tidak valid!`);
+      }
+      break;
+    default:
+      gagal(`Kategori "${kategori}" tidak ditemukan!`);
+  }
+  return biaya;
+}
+
+// Fungsi dengan return object: hitung diskon, voucher, pajak, dan total bayar (dari UTS)
+function hitungTotal(
+  hargaSatuan: number,
+  jumlah: number,
+  statusMember: string,
+  pakaiVoucher: boolean,
+): HasilHitung {
+  let persentaseDiskon: number = 0; // 0.2 = 20%, 0.05 = 5%
+  let potonganVoucher: number = 0;  // potongan rupiah dari voucher
+
+  // IF 1: diskon grosir (perbandingan >= dan === serta logika &&)
+  if (jumlah >= 5 && statusMember === "member") {
+    persentaseDiskon = 0.2;
+  }
+  // IF 2: diskon member standar (else if agar tidak ganda dengan 20%)
+  else if (statusMember === "member") {
+    persentaseDiskon = 0.05;
+  }
+  // IF 3: voucher potongan Rp10.000
+  if (pakaiVoucher) {
+    potonganVoucher = 10000;
+  }
+
+  const totalKotor: number = hargaSatuan * jumlah;       // harga x jumlah
+  let nilaiDiskon: number = totalKotor;                  // mulai dari total kotor
+  nilaiDiskon *= persentaseDiskon;                       // compound *=: diskon dalam rupiah
+  let totalBayar: number = totalKotor - nilaiDiskon;     // setelah diskon
+  totalBayar -= potonganVoucher;                         // compound -=
+  const nilaiPajak: number = totalBayar * PAJAK_RATE;    // pajak 11%
+  totalBayar += nilaiPajak;                              // compound +=
+
+  return { totalKotor, persentaseDiskon, nilaiDiskon, potonganVoucher, nilaiPajak, totalBayar };
+}
+
+// Fungsi void: ringkasan stok (memakai operator / % dan compound /=)
+function tampilRingkasanStok(): void {
+  const total: number = hitungNilaiStok(dataProduk);   // total nilai seluruh stok
+  let rataPerProduk: number = total;
+  rataPerProduk /= dataProduk.length;                  // compound /=: rata-rata per produk
+  const sisaRibuan: number = total % 1000;             // operator modulus %: sisa di bawah seribu
+  const dalamRibuan: number = (total - sisaRibuan) / 1000; // operator /: nilai dalam ribuan
+  console.log(`Total nilai stok     : ${formatRupiah(total)}`);
+  console.log(`Rata-rata per produk : ${formatRupiah(rataPerProduk)}`);
+  console.log(`Dalam ribuan         : ${dalamRibuan} ribu (sisa Rp ${sisaRibuan})`);
+}
+
+// ============================================================
+// BAGIAN 3 - FITUR CREATE (belum dikerjakan)
+// ============================================================
+async function tambahProduk(): Promise<void> {
+  // TODO: kerjakan di progress berikutnya
+  console.log("Fitur Tambah Produk belum dikerjakan.");
+}
+
+// ============================================================
+// BAGIAN 4 - FITUR READ (belum dikerjakan)
+// ============================================================
+async function tampilSemuaProduk(): Promise<void> {
+  // TODO: kerjakan di progress berikutnya
+  console.log("Fitur Tampil Semua Produk belum dikerjakan.");
+}
+
+async function tampilDetailProduk(): Promise<void> {
+  // TODO: kerjakan di progress berikutnya
+  console.log("Fitur Detail Produk belum dikerjakan.");
+}
+
+// ============================================================
+// BAGIAN 5 - FITUR UPDATE & DELETE (belum dikerjakan)
+// ============================================================
+async function ubahProduk(): Promise<void> {
+  // TODO: kerjakan di progress berikutnya
+  console.log("Fitur Ubah Produk belum dikerjakan.");
+}
+
+async function hapusProduk(): Promise<void> {
+  // TODO: kerjakan di progress berikutnya
+  console.log("Fitur Hapus Produk belum dikerjakan.");
+}
+
+// ============================================================
+// BAGIAN 6 - FITUR SEARCH (belum dikerjakan)
+// ============================================================
+async function cariProduk(): Promise<void> {
+  // TODO: kerjakan di progress berikutnya
+  console.log("Fitur Cari Produk belum dikerjakan.");
+}
