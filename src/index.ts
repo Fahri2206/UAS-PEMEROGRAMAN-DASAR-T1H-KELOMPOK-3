@@ -291,3 +291,161 @@ async function cariProduk(): Promise<void> {
   // TODO: kerjakan di progress berikutnya
   console.log("Fitur Cari Produk belum dikerjakan.");
 }
+// ========================================================
+// BAGIAN 7 - TRANSAKSI KASIR
+// ========================================================
+async function transaksiKasir(): Promise<void> {
+  // Langkah 1: pilih produk berdasarkan ID
+  const id: number = await tanyaValid("Masukkan ID produk: ", (j) => {
+    const angka = Number(j); // Number("3abc") = NaN sehingga ditolak
+    if (!Number.isInteger(angka) || angka <= 0) {
+      gagal("ID harus berupa bilangan bulat lebih dari 0!");
+    }
+    return angka;
+  });
+
+  const produk: Produk | undefined = dataProduk.find((p) => p.id === id); // cari berdasarkan id
+
+  // NESTED 3 tingkat: if (produk ada) -> if (aktif) -> if (stok cukup)
+  if (produk !== undefined) {
+    if (produk.aktif) {
+      if (produk.stok > 0) {
+        console.log(`Produk: ${produk.nama} (${produk.kategori} ${produk.ukuran}) - stok ${produk.stok}`);
+
+        // Langkah 2: jumlah beli
+        const jumlah: number = await tanyaValid("Jumlah Item Dibeli (pcs): ", (j) => {
+          const angka = Number(j);
+          if (!Number.isInteger(angka) || angka <= 0) {
+            gagal("Jumlah harus berupa bilangan bulat lebih dari 0!");
+          }
+          if (angka > produk.stok) {
+            gagal(`Stok tidak cukup (tersisa ${produk.stok})!`);
+          }
+          return angka;
+        });
+
+        // Langkah 3: status member dan voucher (pilihan nomor seperti UTS)
+        const statusMember: string = await tanyaValid("Status Member (1. Member, 2. Biasa): ", (j) => {
+          const daftar: Record<string, string> = { "1": "member", "2": "biasa" };
+          Object.keys(daftar).includes(j) || gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
+          return daftar[j];
+        });
+
+        const pakaiVoucher: boolean = await tanyaValid("Gunakan Voucher? (1. Ada, 2. Tidak): ", (j) => {
+          j === "1" || j === "2" || gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
+          return j === "1";
+        });
+
+        // Langkah 4: hitung total dan kurangi stok
+        const hargaSatuan: number = produk.harga + biayaTambahan(produk.kategori, produk.ukuran);
+        const hasil: HasilHitung = hitungTotal(hargaSatuan, jumlah, statusMember, pakaiVoucher);
+        produk.stok -= jumlah; // compound -=: stok berkurang
+
+        // Langkah 5: cetak struk
+        console.log("");
+        cetakGaris();
+        console.log(`      STRUK ${NAMA_TOKO}`);
+        cetakGaris();
+        console.log(`Pakaian      : ${produk.nama} (${produk.ukuran})`);
+        console.log(`Harga Satuan : ${formatRupiah(hargaSatuan)}`);
+        console.log(`Jumlah Item  : ${jumlah} pcs`);
+        console.log(`Total Kotor  : ${formatRupiah(hasil.totalKotor)}`);
+        console.log(`Diskon       : ${hasil.persentaseDiskon * 100}% (-${formatRupiah(hasil.nilaiDiskon)})`);
+        console.log(`Voucher      : -${formatRupiah(hasil.potonganVoucher)}`);
+        console.log(`Pajak (11%)  : ${formatRupiah(hasil.nilaiPajak)}`);
+        console.log("-".repeat(40));
+        console.log(`TOTAL BAYAR  : ${formatRupiah(hasil.totalBayar)}`);
+        cetakGaris();
+
+        // Peringatan jika stok menipis (operator perbandingan <)
+        if (produk.stok < STOK_MINIMUM) {
+          console.log(`Peringatan: stok ${produk.nama} tinggal ${produk.stok}.`);
+        }
+      } else {
+        console.log("Stok produk habis.");
+      }
+    } else {
+      console.log("Produk tidak dijual (nonaktif).");
+    }
+  } else {
+    console.log(`Produk dengan ID ${id} tidak ditemukan.`);
+  }
+}
+
+// ========================================================
+// BAGIAN 8 - MENU UTAMA
+// ========================================================
+
+// Fungsi void: menampilkan daftar menu
+function tampilMenu(): void {
+  console.log("");
+  cetakGaris();
+  console.log(`      KASIR TOKO ${NAMA_TOKO}`);
+  cetakGaris();
+  console.log("1. Tambah produk");
+  console.log("2. Tampil semua produk");
+  console.log("3. Detail produk (berdasarkan ID)");
+  console.log("4. Ubah produk");
+  console.log("5. Hapus produk");
+  console.log("6. Cari produk");
+  console.log("7. Transaksi kasir");
+  console.log("8. Nilai total stok");
+  console.log("0. Keluar");
+  cetakGaris();
+}
+
+// Fungsi utama: menu berulang (while) sampai pengguna memilih keluar
+async function main(): Promise<void> {
+  let jalan: boolean = true; // penanda program masih berjalan
+
+  while (jalan) {
+    tampilMenu();
+    const pilihan: string = (await rl.question("Pilih menu: ")).trim();
+
+    // switch dengan banyak case dan default; break di setiap case
+    switch (pilihan) {
+      case "1":
+        await tambahProduk();
+        break;
+      case "2":
+        await tampilSemuaProduk();
+        break;
+      case "3":
+        await tampilDetailProduk();
+        break;
+      case "4":
+        await ubahProduk();
+        break;
+      case "5":
+        await hapusProduk();
+        break;
+      case "6":
+        await cariProduk();
+        break;
+      case "7":
+        await transaksiKasir();
+        break;
+      case "8":
+        // Jika data kosong, rata-rata tidak bisa dihitung (hindari pembagian dengan nol)
+        if (dataProduk.length === 0) {
+          console.log("Data produk masih kosong.");
+        } else {
+          tampilRingkasanStok();
+        }
+        break;
+      case "0":
+        jalan = false; // hentikan perulangan
+        console.log("Terima kasih, program selesai.");
+        break;
+      default:
+        // Input menu tidak valid (kosong / bukan angka menu) ditangani di sini
+        if (pilihan === "" || !(pilihan >= "0" && pilihan <= "8")) {
+          console.log("Pilihan tidak valid, masukkan angka 0-8.");
+        }
+    }
+  }
+  rl.close(); // tutup input terminal agar program selesai bersih
+}
+
+// Jalankan program
+main();
