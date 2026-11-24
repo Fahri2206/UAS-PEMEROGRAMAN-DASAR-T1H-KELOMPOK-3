@@ -1,4 +1,4 @@
-# Project UAS Algoritma dan Pemrograman - [Isi Tema Kelompok]
+# Project UAS Algoritma dan Pemrograman - [KASIR TOKOO]
 
 ## Daftar Anggota Kelompok
 
