@@ -147,7 +147,10 @@ function hitungNilaiStok(daftar: Produk[]): number {
   let total: number = 0;
   // Perulangan for biasa
   for (let i = 0; i < daftar.length; i++) {
-    total += daftar[i].harga * daftar[i].stok; // compound += dan operator *
+    const produk = daftar[i];
+    if (produk) {
+      total += produk.harga * produk.stok; // compound += dan operator *
+    }
   }
   return total;
 }
