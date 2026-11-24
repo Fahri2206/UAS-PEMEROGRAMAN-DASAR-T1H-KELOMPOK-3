@@ -212,7 +212,7 @@ function hitungTotal(
   pakaiVoucher: boolean,
 ): HasilHitung {
   let persentaseDiskon: number = 0; // 0.2 = 20%, 0.05 = 5%
-  let potonganVoucher: number = 0;  // potongan rupiah dari voucher
+  let potonganVoucher: number = 0; // potongan rupiah dari voucher
 
   // IF 1: diskon grosir (perbandingan >= dan === serta logika &&)
   if (jumlah >= 5 && statusMember === "member") {
@@ -227,27 +227,36 @@ function hitungTotal(
     potonganVoucher = 10000;
   }
 
-  const totalKotor: number = hargaSatuan * jumlah;       // harga x jumlah
-  let nilaiDiskon: number = totalKotor;                  // mulai dari total kotor
-  nilaiDiskon *= persentaseDiskon;                       // compound *=: diskon dalam rupiah
-  let totalBayar: number = totalKotor - nilaiDiskon;     // setelah diskon
-  totalBayar -= potonganVoucher;                         // compound -=
-  const nilaiPajak: number = totalBayar * PAJAK_RATE;    // pajak 11%
-  totalBayar += nilaiPajak;                              // compound +=
+  const totalKotor: number = hargaSatuan * jumlah; // harga x jumlah
+  let nilaiDiskon: number = totalKotor; // mulai dari total kotor
+  nilaiDiskon *= persentaseDiskon; // compound *=: diskon dalam rupiah
+  let totalBayar: number = totalKotor - nilaiDiskon; // setelah diskon
+  totalBayar -= potonganVoucher; // compound -=
+  const nilaiPajak: number = totalBayar * PAJAK_RATE; // pajak 11%
+  totalBayar += nilaiPajak; // compound +=
 
-  return { totalKotor, persentaseDiskon, nilaiDiskon, potonganVoucher, nilaiPajak, totalBayar };
+  return {
+    totalKotor,
+    persentaseDiskon,
+    nilaiDiskon,
+    potonganVoucher,
+    nilaiPajak,
+    totalBayar,
+  };
 }
 
 // Fungsi void: ringkasan stok (memakai operator / % dan compound /=)
 function tampilRingkasanStok(): void {
-  const total: number = hitungNilaiStok(dataProduk);   // total nilai seluruh stok
+  const total: number = hitungNilaiStok(dataProduk); // total nilai seluruh stok
   let rataPerProduk: number = total;
-  rataPerProduk /= dataProduk.length;                  // compound /=: rata-rata per produk
-  const sisaRibuan: number = total % 1000;             // operator modulus %: sisa di bawah seribu
+  rataPerProduk /= dataProduk.length; // compound /=: rata-rata per produk
+  const sisaRibuan: number = total % 1000; // operator modulus %: sisa di bawah seribu
   const dalamRibuan: number = (total - sisaRibuan) / 1000; // operator /: nilai dalam ribuan
   console.log(`Total nilai stok     : ${formatRupiah(total)}`);
   console.log(`Rata-rata per produk : ${formatRupiah(rataPerProduk)}`);
-  console.log(`Dalam ribuan         : ${dalamRibuan} ribu (sisa Rp ${sisaRibuan})`);
+  console.log(
+    `Dalam ribuan         : ${dalamRibuan} ribu (sisa Rp ${sisaRibuan})`,
+  );
 }
 
 // ============================================================
@@ -310,35 +319,55 @@ async function transaksiKasir(): Promise<void> {
   if (produk !== undefined) {
     if (produk.aktif) {
       if (produk.stok > 0) {
-        console.log(`Produk: ${produk.nama} (${produk.kategori} ${produk.ukuran}) - stok ${produk.stok}`);
+        console.log(
+          `Produk: ${produk.nama} (${produk.kategori} ${produk.ukuran}) - stok ${produk.stok}`,
+        );
 
         // Langkah 2: jumlah beli
-        const jumlah: number = await tanyaValid("Jumlah Item Dibeli (pcs): ", (j) => {
-          const angka = Number(j);
-          if (!Number.isInteger(angka) || angka <= 0) {
-            gagal("Jumlah harus berupa bilangan bulat lebih dari 0!");
-          }
-          if (angka > produk.stok) {
-            gagal(`Stok tidak cukup (tersisa ${produk.stok})!`);
-          }
-          return angka;
-        });
+        const jumlah: number = await tanyaValid(
+          "Jumlah Item Dibeli (pcs): ",
+          (j) => {
+            const angka = Number(j);
+            if (!Number.isInteger(angka) || angka <= 0) {
+              gagal("Jumlah harus berupa bilangan bulat lebih dari 0!");
+            }
+            if (angka > produk.stok) {
+              gagal(`Stok tidak cukup (tersisa ${produk.stok})!`);
+            }
+            return angka;
+          },
+        );
 
         // Langkah 3: status member dan voucher (pilihan nomor seperti UTS)
-        const statusMember: string = await tanyaValid("Status Member (1. Member, 2. Biasa): ", (j) => {
-          const daftar: Record<string, string> = { "1": "member", "2": "biasa" };
-          Object.keys(daftar).includes(j) || gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
-          return daftar[j];
-        });
+        const statusMember: string = await tanyaValid(
+          "Status Member (1. Member, 2. Biasa): ",
+          (j) => {
+            if (j !== "1" && j !== "2") {
+              gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
+            }
+            return j === "1" ? "member" : "biasa";
+          },
+        );
 
-        const pakaiVoucher: boolean = await tanyaValid("Gunakan Voucher? (1. Ada, 2. Tidak): ", (j) => {
-          j === "1" || j === "2" || gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
-          return j === "1";
-        });
+        const pakaiVoucher: boolean = await tanyaValid(
+          "Gunakan Voucher? (1. Ada, 2. Tidak): ",
+          (j) => {
+            j === "1" ||
+              j === "2" ||
+              gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
+            return j === "1";
+          },
+        );
 
         // Langkah 4: hitung total dan kurangi stok
-        const hargaSatuan: number = produk.harga + biayaTambahan(produk.kategori, produk.ukuran);
-        const hasil: HasilHitung = hitungTotal(hargaSatuan, jumlah, statusMember, pakaiVoucher);
+        const hargaSatuan: number =
+          produk.harga + biayaTambahan(produk.kategori, produk.ukuran);
+        const hasil: HasilHitung = hitungTotal(
+          hargaSatuan,
+          jumlah,
+          statusMember,
+          pakaiVoucher,
+        );
         produk.stok -= jumlah; // compound -=: stok berkurang
 
         // Langkah 5: cetak struk
@@ -350,7 +379,9 @@ async function transaksiKasir(): Promise<void> {
         console.log(`Harga Satuan : ${formatRupiah(hargaSatuan)}`);
         console.log(`Jumlah Item  : ${jumlah} pcs`);
         console.log(`Total Kotor  : ${formatRupiah(hasil.totalKotor)}`);
-        console.log(`Diskon       : ${hasil.persentaseDiskon * 100}% (-${formatRupiah(hasil.nilaiDiskon)})`);
+        console.log(
+          `Diskon       : ${hasil.persentaseDiskon * 100}% (-${formatRupiah(hasil.nilaiDiskon)})`,
+        );
         console.log(`Voucher      : -${formatRupiah(hasil.potonganVoucher)}`);
         console.log(`Pajak (11%)  : ${formatRupiah(hasil.nilaiPajak)}`);
         console.log("-".repeat(40));
@@ -359,7 +390,9 @@ async function transaksiKasir(): Promise<void> {
 
         // Peringatan jika stok menipis (operator perbandingan <)
         if (produk.stok < STOK_MINIMUM) {
-          console.log(`Peringatan: stok ${produk.nama} tinggal ${produk.stok}.`);
+          console.log(
+            `Peringatan: stok ${produk.nama} tinggal ${produk.stok}.`,
+          );
         }
       } else {
         console.log("Stok produk habis.");
