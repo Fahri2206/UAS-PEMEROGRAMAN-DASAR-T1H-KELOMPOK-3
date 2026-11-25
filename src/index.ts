@@ -381,18 +381,33 @@ function tampilDetail(p: Produk): void {
   console.log(`Stok      : ${p.stok}`);
   console.log(`Status    : ${p.aktif ? "Aktif (dijual)" : "Nonaktif"}`);
   cetakGaris();
+}
 
 // ============================================================
-// BAGIAN 4 - FITUR READ (belum dikerjakan)
+// BAGIAN 4 - FITUR READ (diusulkan: anggota 2, Progress 4)
 // ============================================================
 async function tampilSemuaProduk(): Promise<void> {
-  // TODO: kerjakan di progress berikutnya
-  console.log("Fitur Tampil Semua Produk belum dikerjakan.");
+  // Pesan khusus jika data kosong
+  if (dataProduk.length === 0) {
+    console.log("Data produk masih kosong.");
+    return;
+  }
+  console.log(`--- Daftar Produk (${dataProduk.length} data) ---`);
+  tampilTabel(dataProduk);
 }
 
 async function tampilDetailProduk(): Promise<void> {
-  // TODO: kerjakan di progress berikutnya
-  console.log("Fitur Detail Produk belum dikerjakan.");
+  if (dataProduk.length === 0) {
+    console.log("Data produk masih kosong.");
+    return;
+  }
+  const id: number = await tanyaAngka("Masukkan ID produk: ");
+  const indeks: number = dataProduk.findIndex((p) => p.id === id); // -1 jika tidak ada
+  if (indeks === -1) {
+    console.log(`Produk dengan ID ${id} tidak ditemukan.`);
+  } else {
+    tampilDetail(dataProduk[indeks]!);
+  }
 }
 
 // ============================================================
