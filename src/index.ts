@@ -524,12 +524,66 @@ async function hapusProduk(): Promise<void> {
 }
 
 // ============================================================
-// BAGIAN 6 - FITUR SEARCH (belum dikerjakan)
+// BAGIAN 6 - FITUR SEARCH (Progress 6)
 // ============================================================
 async function cariProduk(): Promise<void> {
-  // TODO: kerjakan di progress berikutnya
-  console.log("Fitur Cari Produk belum dikerjakan.");
+  if (dataProduk.length === 0) {
+    console.log("Data produk masih kosong.");
+    return;
+  }
+  console.log("--- Cari Produk ---");
+  // Kata kunci: Enter = semua nama
+  const kataKunci: string = (await rl.question("Kata kunci nama (Enter = semua): ")).trim().toLowerCase();
+
+  // Filter kategori: 0 = semua
+  const kategoriFilter: string = await tanyaValid(
+    "Filter kategori (0. Semua, 1. Kaos, 2. Kemeja, 3. Jaket): ",
+    (j) => {
+      const daftar: Record<string, string> = { "0": "", "1": "Kaos", "2": "Kemeja", "3": "Jaket" };
+      Object.keys(daftar).includes(j) || gagal(`Pilihan "${j}" tidak valid! Pilih 0-3.`);
+      return daftar[j]; // "" berarti tanpa filter
+    },
+  );
+
+  // Filter harga maksimum: Enter = tanpa batas
+  const hargaMaks: number = await tanyaValid("Harga maksimum (Enter = tanpa batas): ", (j) => {
+    if (j === "") {
+      return Infinity; // tanpa batas
+    }
+    const angka = Number(j);
+    if (!Number.isInteger(angka) || angka < 0) {
+      gagal("Harga harus bilangan bulat tidak negatif!");
+    }
+    return angka;
+  });
+
+  // Filter status: 0 = semua, 1 = aktif, 2 = nonaktif
+  const statusFilter: string = await tanyaValid(
+    "Filter status (0. Semua, 1. Aktif, 2. Nonaktif): ",
+    (j) => {
+      j === "0" || j === "1" || j === "2" || gagal(`Pilihan "${j}" tidak valid! Pilih 0-2.`);
+      return j;
+    },
+  );
+
+  // Terapkan semua filter dengan filter(); nama dibandingkan tanpa peduli huruf besar/kecil
+  const hasil: Produk[] = dataProduk.filter((p) => {
+    const cocokNama: boolean = p.nama.toLowerCase().includes(kataKunci);
+    const cocokKategori: boolean = kategoriFilter === "" || p.kategori === kategoriFilter;
+    const cocokHarga: boolean = p.harga <= hargaMaks;
+    const cocokStatus: boolean =
+      statusFilter === "0" || (statusFilter === "1" ? p.aktif : !p.aktif);
+    return cocokNama && cocokKategori && cocokHarga && cocokStatus;
+  });
+
+  if (hasil.length === 0) {
+    console.log("Tidak ada produk yang cocok dengan pencarian.");
+  } else {
+    console.log(`Ditemukan ${hasil.length} produk:`);
+    tampilTabel(hasil);
+  }
 }
+
 // ============================================================
 // BAGIAN 7 - TRANSAKSI KASIR
 // ============================================================
