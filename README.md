@@ -1,4 +1,4 @@
-# Project UAS Algoritma dan Pemrograman - [Isi Tema Kelompok]
+# Project UAS PEMEROGRAMAN DASAR T1H - [KASIR TOKO]
 
 ## Daftar Anggota Kelompok
 
@@ -6,6 +6,7 @@
 | :----------------------------- | :-------------- | :---------- |
 | Mochammad Fachry Zaenal Firoos | 263140707111109 | @Fahri2206  |
 | Muhammad Gilang Dwi Saputra    | 263140707111102 | @gilangputraa2806-ppt |
+| Danilo Junio Saputra           | 263140707111104 | @danilojunio549 |
 
 ## Pembagian Tugas
 
@@ -13,7 +14,7 @@
 | :------------ | :------------------------------- |
 | Fahri (Ketua) | Setup Repo, Menu Utama, & Create |
 | Gilang        | Read & Search                    |
-| [Anggota 3]   | Update & Delete                  |
+| Danilo        | Update & Delete                  |
 
 ## Cara Menjalankan Program
 
