@@ -353,6 +353,34 @@ async function tambahProduk(): Promise<void> {
     `Produk "${nama}" berhasil ditambahkan dengan ID ${produkBaru.id}.`,
   );
 }
+// Fungsi void: menampilkan daftar produk dalam tabel rapi memakai forEach
+function tampilTabel(daftar: Produk[]): void {
+  console.log("-".repeat(78));
+  console.log(
+    "ID".padEnd(4) + "Nama".padEnd(22) + "Kategori".padEnd(10) + "Ukr".padEnd(5) +
+    "Harga".padEnd(12) + "Stok".padEnd(6) + "Status",
+  );
+  console.log("-".repeat(78));
+  daftar.forEach((p) => {
+    console.log(
+      String(p.id).padEnd(4) + p.nama.padEnd(22) + p.kategori.padEnd(10) + p.ukuran.padEnd(5) +
+      formatRupiah(p.harga).padEnd(12) + String(p.stok).padEnd(6) + (p.aktif ? "Aktif" : "Nonaktif"),
+    );
+  });
+  console.log("-".repeat(78));
+}
+
+// Fungsi void: menampilkan detail lengkap satu produk
+function tampilDetail(p: Produk): void {
+  cetakGaris();
+  console.log(`ID        : ${p.id}`);
+  console.log(`Nama      : ${p.nama}`);
+  console.log(`Kategori  : ${p.kategori}`);
+  console.log(`Ukuran    : ${p.ukuran}`);
+  console.log(`Harga     : ${formatRupiah(p.harga)}`);
+  console.log(`Stok      : ${p.stok}`);
+  console.log(`Status    : ${p.aktif ? "Aktif (dijual)" : "Nonaktif"}`);
+  cetakGaris();
 
 // ============================================================
 // BAGIAN 4 - FITUR READ (belum dikerjakan)
