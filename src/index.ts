@@ -411,16 +411,108 @@ async function tampilDetailProduk(): Promise<void> {
 }
 
 // ============================================================
-// BAGIAN 5 - FITUR UPDATE & DELETE (belum dikerjakan)
+// BAGIAN 5 - FITUR UPDATE & DELETE (diusulkan: anggota 3, Progress 5)
 // ============================================================
 async function ubahProduk(): Promise<void> {
-  // TODO: kerjakan di progress berikutnya
-  console.log("Fitur Ubah Produk belum dikerjakan.");
+  if (dataProduk.length === 0) {
+    console.log("Data produk masih kosong.");
+    return;
+  }
+  const id: number = await tanyaAngka("Masukkan ID produk yang diubah: ");
+  const produk: Produk | undefined = dataProduk.find((p) => p.id === id);
+  if (produk === undefined) {
+    console.log(`Produk dengan ID ${id} tidak ditemukan.`);
+    return;
+  }
+
+  console.log("Data saat ini:");
+  tampilDetail(produk); // tampilkan nilai lama dulu
+  console.log("(Tekan Enter untuk melewati kolom yang tidak diubah)");
+
+  // Nama: Enter = tidak diubah
+  const namaBaru: string = (await rl.question(`Nama [${produk.nama}]: `)).trim();
+  if (namaBaru !== "") {
+    produk.nama = namaBaru;
+  }
+
+  // Kategori: Enter = tidak diubah
+  const kategoriBaru: string = await tanyaValid(
+    `Kategori [${produk.kategori}] (1. Kaos, 2. Kemeja, 3. Jaket): `,
+    (j) => {
+      const daftar: Record<string, string> = { "1": "Kaos", "2": "Kemeja", "3": "Jaket" };
+      if (j === "") {
+        return produk.kategori; // lewati
+      }
+      Object.keys(daftar).includes(j) || gagal(`Kategori "${j}" tidak valid! Pilih 1/2/3.`);
+      return daftar[j];
+    },
+  );
+  produk.kategori = kategoriBaru;
+
+  // Ukuran: Enter = tidak diubah
+  const ukuranBaru: string = await tanyaValid(
+    `Ukuran [${produk.ukuran}] (1. S, 2. M, 3. L, 4. XL): `,
+    (j) => {
+      const daftar: Record<string, string> = { "1": "S", "2": "M", "3": "L", "4": "XL" };
+      if (j === "") {
+        return produk.ukuran; // lewati
+      }
+      Object.keys(daftar).includes(j) || gagal(`Ukuran "${j}" tidak valid! Pilih 1/2/3/4.`);
+      return daftar[j];
+    },
+  );
+  produk.ukuran = ukuranBaru;
+
+  // Harga dan stok: Enter = tidak diubah, selain itu harus angka valid tidak negatif
+  const bacaAngkaOpsional = (lama: number) => (j: string): number => {
+    if (j === "") {
+      return lama; // lewati
+    }
+    const angka = Number(j);
+    if (!Number.isInteger(angka) || angka < 0) {
+      gagal("Isian harus bilangan bulat tidak negatif!");
+    }
+    return angka;
+  };
+  produk.harga = await tanyaValid(`Harga [${produk.harga}]: `, bacaAngkaOpsional(produk.harga));
+  produk.stok = await tanyaValid(`Stok [${produk.stok}]: `, bacaAngkaOpsional(produk.stok));
+
+  // Status: Y = aktif, N = nonaktif, Enter = tidak diubah
+  produk.aktif = await tanyaValid(
+    `Status aktif [${produk.aktif ? "Y" : "N"}] (Y/N): `,
+    (j) => {
+      const huruf: string = j.toLowerCase();
+      if (huruf === "") {
+        return produk.aktif; // lewati
+      }
+      huruf === "y" || huruf === "n" || gagal("Jawab dengan Y atau N!");
+      return huruf === "y";
+    },
+  );
+
+  console.log(`Produk ID ${id} berhasil diubah.`);
 }
 
 async function hapusProduk(): Promise<void> {
-  // TODO: kerjakan di progress berikutnya
-  console.log("Fitur Hapus Produk belum dikerjakan.");
+  if (dataProduk.length === 0) {
+    console.log("Data produk masih kosong, tidak ada yang bisa dihapus.");
+    return;
+  }
+  const id: number = await tanyaAngka("Masukkan ID produk yang dihapus: ");
+  const indeks: number = dataProduk.findIndex((p) => p.id === id);
+  if (indeks === -1) {
+    console.log(`Produk dengan ID ${id} tidak ditemukan.`);
+    return;
+  }
+
+  tampilDetail(dataProduk[indeks]);
+  const yakin: boolean = await konfirmasi("Yakin hapus produk ini? (Y/N): ");
+  if (yakin) {
+    dataProduk.splice(indeks, 1); // hapus 1 elemen pada posisi indeks
+    console.log(`Produk ID ${id} berhasil dihapus.`);
+  } else {
+    console.log("Penghapusan dibatalkan.");
+  }
 }
 
 // ============================================================
