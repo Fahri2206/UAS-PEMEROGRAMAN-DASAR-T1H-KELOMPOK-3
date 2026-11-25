@@ -258,6 +258,63 @@ function tampilRingkasanStok(): void {
     `Dalam ribuan         : ${dalamRibuan} ribu (sisa Rp ${sisaRibuan})`,
   );
 }
+// ============================================================
+// BAGIAN 2B - FUNGSI BANTU INPUT & TAMPILAN (dipakai fitur CRUD + Search)
+// ============================================================
+// Fungsi bantu: input teks, tidak boleh kosong
+async function tanyaTeks(pesan: string): Promise<string> {
+  return tanyaValid(pesan, (j) => {
+    if (j === "") {
+      gagal("Isian tidak boleh kosong!");
+    }
+    return j;
+  });
+}
+
+// Fungsi bantu: input bilangan bulat, tidak boleh kosong / huruf / desimal / negatif
+async function tanyaAngka(pesan: string): Promise<number> {
+  return tanyaValid(pesan, (j) => {
+    const angka = Number(j); // Number("") = 0, jadi kosong dicek terpisah
+    if (j === "" || !Number.isInteger(angka)) {
+      gagal("Isian harus berupa bilangan bulat!");
+    }
+    if (angka < 0) {
+      gagal("Nilai tidak boleh negatif!");
+    }
+    return angka;
+  });
+}
+
+// Fungsi bantu: pilih kategori lewat nomor, mengembalikan nama kategori
+async function pilihKategori(): Promise<string> {
+  const daftar: Record<string, string> = {
+    "1": "Kaos",
+    "2": "Kemeja",
+    "3": "Jaket",
+  };
+  return tanyaValid("Kategori (1. Kaos, 2. Kemeja, 3. Jaket): ", (j) => {
+    if (!Object.prototype.hasOwnProperty.call(daftar, j)) {
+      gagal(`Kategori "${j}" tidak valid! Pilih 1/2/3.`);
+    }
+    return daftar[j] as string;
+  });
+}
+
+// Fungsi bantu: pilih ukuran lewat nomor, mengembalikan huruf ukuran
+async function pilihUkuran(): Promise<string> {
+  const daftar: Record<string, string> = {
+    "1": "S",
+    "2": "M",
+    "3": "L",
+    "4": "XL",
+  };
+  return tanyaValid("Ukuran (1. S, 2. M, 3. L, 4. XL): ", (j) => {
+    if (!Object.prototype.hasOwnProperty.call(daftar, j)) {
+      gagal(`Ukuran "${j}" tidak valid! Pilih 1/2/3/4.`);
+    }
+    return daftar[j] as string;
+  });
+}
 
 // ============================================================
 // BAGIAN 3 - FITUR CREATE (belum dikerjakan)
