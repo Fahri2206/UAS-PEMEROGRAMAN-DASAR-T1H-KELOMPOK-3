@@ -430,9 +430,9 @@ async function cariProduk(): Promise<void> {
   // TODO: kerjakan di progress berikutnya
   console.log("Fitur Cari Produk belum dikerjakan.");
 }
-// ========================================================
+// ============================================================
 // BAGIAN 7 - TRANSAKSI KASIR
-// ========================================================
+// ============================================================
 async function transaksiKasir(): Promise<void> {
   // Langkah 1: pilih produk berdasarkan ID
   const id: number = await tanyaValid("Masukkan ID produk: ", (j) => {
@@ -442,87 +442,60 @@ async function transaksiKasir(): Promise<void> {
     }
     return angka;
   });
-
   const produk: Produk | undefined = dataProduk.find((p) => p.id === id); // cari berdasarkan id
 
   // NESTED 3 tingkat: if (produk ada) -> if (aktif) -> if (stok cukup)
   if (produk !== undefined) {
     if (produk.aktif) {
       if (produk.stok > 0) {
-        console.log(
-          `Produk: ${produk.nama} (${produk.kategori} ${produk.ukuran}) - stok ${produk.stok}`,
-        );
+        console.log(`Produk: ${produk.nama} (${produk.kategori} ${produk.ukuran}) - stok ${produk.stok}`);
 
         // Langkah 2: jumlah beli
-        const jumlah: number = await tanyaValid(
-          "Jumlah Item Dibeli (pcs): ",
-          (j) => {
-            const angka = Number(j);
-            if (!Number.isInteger(angka) || angka <= 0) {
-              gagal("Jumlah harus berupa bilangan bulat lebih dari 0!");
-            }
-            if (angka > produk.stok) {
-              gagal(`Stok tidak cukup (tersisa ${produk.stok})!`);
-            }
-            return angka;
-          },
-        );
+        const jumlah: number = await tanyaValid("Jumlah Item Dibeli (pcs): ", (j) => {
+          const angka = Number(j);
+          if (!Number.isInteger(angka) || angka <= 0) {
+            gagal("Jumlah harus berupa bilangan bulat lebih dari 0!");
+          }
+          if (angka > produk.stok) {
+            gagal(`Stok tidak cukup (tersisa ${produk.stok})!`);
+          }
+          return angka;
+        });
 
         // Langkah 3: status member dan voucher (pilihan nomor seperti UTS)
-        const statusMember: string = await tanyaValid(
-          "Status Member (1. Member, 2. Biasa): ",
-          (j) => {
-            if (j !== "1" && j !== "2") {
-              gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
-            }
-            return j === "1" ? "member" : "biasa";
-          },
-        );
-
-        const pakaiVoucher: boolean = await tanyaValid(
-          "Gunakan Voucher? (1. Ada, 2. Tidak): ",
-          (j) => {
-            j === "1" ||
-              j === "2" ||
-              gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
-            return j === "1";
-          },
-        );
+        const statusMember: string = await tanyaValid("Status Member (1. Member, 2. Biasa): ", (j) => {
+          const daftar: Record<string, string> = { "1": "member", "2": "biasa" };
+          Object.keys(daftar).includes(j) || gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
+          return daftar[j];
+        });
+        const pakaiVoucher: boolean = await tanyaValid("Gunakan Voucher? (1. Ada, 2. Tidak): ", (j) => {
+          j === "1" || j === "2" || gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
+          return j === "1";
+        });
 
         // Langkah 4: hitung total dan kurangi stok
-        const hargaSatuan: number =
-          produk.harga + biayaTambahan(produk.kategori, produk.ukuran);
-        const hasil: HasilHitung = hitungTotal(
-          hargaSatuan,
-          jumlah,
-          statusMember,
-          pakaiVoucher,
-        );
+        const hargaSatuan: number = produk.harga + biayaTambahan(produk.kategori, produk.ukuran);
+        const hasil: HasilHitung = hitungTotal(hargaSatuan, jumlah, statusMember, pakaiVoucher);
         produk.stok -= jumlah; // compound -=: stok berkurang
 
         // Langkah 5: cetak struk
         console.log("");
         cetakGaris();
-        console.log(`      STRUK ${NAMA_TOKO}`);
+        console.log(`        STRUK ${NAMA_TOKO}`);
         cetakGaris();
         console.log(`Pakaian      : ${produk.nama} (${produk.ukuran})`);
         console.log(`Harga Satuan : ${formatRupiah(hargaSatuan)}`);
         console.log(`Jumlah Item  : ${jumlah} pcs`);
         console.log(`Total Kotor  : ${formatRupiah(hasil.totalKotor)}`);
-        console.log(
-          `Diskon       : ${hasil.persentaseDiskon * 100}% (-${formatRupiah(hasil.nilaiDiskon)})`,
-        );
+        console.log(`Diskon       : ${hasil.persentaseDiskon * 100}% (-${formatRupiah(hasil.nilaiDiskon)})`);
         console.log(`Voucher      : -${formatRupiah(hasil.potonganVoucher)}`);
         console.log(`Pajak (11%)  : ${formatRupiah(hasil.nilaiPajak)}`);
         console.log("-".repeat(40));
         console.log(`TOTAL BAYAR  : ${formatRupiah(hasil.totalBayar)}`);
         cetakGaris();
-
         // Peringatan jika stok menipis (operator perbandingan <)
         if (produk.stok < STOK_MINIMUM) {
-          console.log(
-            `Peringatan: stok ${produk.nama} tinggal ${produk.stok}.`,
-          );
+          console.log(`Peringatan: stok ${produk.nama} tinggal ${produk.stok}.`);
         }
       } else {
         console.log("Stok produk habis.");
