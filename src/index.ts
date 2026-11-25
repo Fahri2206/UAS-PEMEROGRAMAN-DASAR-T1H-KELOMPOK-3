@@ -409,6 +409,14 @@ async function tampilDetailProduk(): Promise<void> {
     tampilDetail(dataProduk[indeks]!);
   }
 }
+// Fungsi bantu: konfirmasi Y/N, mengembalikan true jika Y
+async function konfirmasi(pesan: string): Promise<boolean> {
+  return tanyaValid(pesan, (j) => {
+    const huruf: string = j.toLowerCase();
+    huruf === "y" || huruf === "n" || gagal("Jawab dengan Y atau N!");
+    return huruf === "y";
+  });
+}
 
 // ============================================================
 // BAGIAN 5 - FITUR UPDATE & DELETE (diusulkan: anggota 3, Progress 5)
