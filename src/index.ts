@@ -317,11 +317,41 @@ async function pilihUkuran(): Promise<string> {
 }
 
 // ============================================================
-// BAGIAN 3 - FITUR CREATE (belum dikerjakan)
+// BAGIAN 3 - FITUR CREATE (diusulkan: anggota 1, Progress 3)
 // ============================================================
 async function tambahProduk(): Promise<void> {
-  // TODO: kerjakan di progress berikutnya
-  console.log("Fitur Tambah Produk belum dikerjakan.");
+  console.log("--- Tambah Produk ---");
+  const nama: string = await tanyaTeks("Nama produk: ");
+  const kategori: string = await pilihKategori();
+  const ukuran: string = await pilihUkuran();
+
+  // Cegah duplikasi: nama + ukuran yang sama tidak boleh ada dua kali
+  const sudahAda: boolean = dataProduk.some(
+    (p) => p.nama.toLowerCase() === nama.toLowerCase() && p.ukuran === ukuran,
+  );
+  if (sudahAda) {
+    console.log(
+      `Produk "${nama}" ukuran ${ukuran} sudah ada. Gunakan menu Ubah.`,
+    );
+    return; // batalkan penambahan
+  }
+
+  const harga: number = await tanyaAngka("Harga dasar (Rp): ");
+  const stok: number = await tanyaAngka("Stok awal (pcs): ");
+
+  const produkBaru: Produk = {
+    id: buatIdBaru(dataProduk), // ID unik otomatis
+    nama,
+    kategori,
+    ukuran,
+    harga,
+    stok,
+    aktif: stok > 0, // produk dengan stok 0 otomatis nonaktif
+  };
+  dataProduk.push(produkBaru); // simpan ke array
+  console.log(
+    `Produk "${nama}" berhasil ditambahkan dengan ID ${produkBaru.id}.`,
+  );
 }
 
 // ============================================================
