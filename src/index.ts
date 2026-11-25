@@ -452,7 +452,7 @@ async function ubahProduk(): Promise<void> {
         return produk.kategori; // lewati
       }
       Object.keys(daftar).includes(j) || gagal(`Kategori "${j}" tidak valid! Pilih 1/2/3.`);
-      return daftar[j];
+      return daftar[j]!;
     },
   );
   produk.kategori = kategoriBaru;
@@ -466,7 +466,7 @@ async function ubahProduk(): Promise<void> {
         return produk.ukuran; // lewati
       }
       Object.keys(daftar).includes(j) || gagal(`Ukuran "${j}" tidak valid! Pilih 1/2/3/4.`);
-      return daftar[j];
+      return daftar[j]!;
     },
   );
   produk.ukuran = ukuranBaru;
@@ -513,7 +513,7 @@ async function hapusProduk(): Promise<void> {
     return;
   }
 
-  tampilDetail(dataProduk[indeks]);
+  tampilDetail(dataProduk[indeks]!);
   const yakin: boolean = await konfirmasi("Yakin hapus produk ini? (Y/N): ");
   if (yakin) {
     dataProduk.splice(indeks, 1); // hapus 1 elemen pada posisi indeks
@@ -541,7 +541,7 @@ async function cariProduk(): Promise<void> {
     (j) => {
       const daftar: Record<string, string> = { "0": "", "1": "Kaos", "2": "Kemeja", "3": "Jaket" };
       Object.keys(daftar).includes(j) || gagal(`Pilihan "${j}" tidak valid! Pilih 0-3.`);
-      return daftar[j]; // "" berarti tanpa filter
+      return daftar[j]!; // "" berarti tanpa filter
     },
   );
 
@@ -619,8 +619,10 @@ async function transaksiKasir(): Promise<void> {
         // Langkah 3: status member dan voucher (pilihan nomor seperti UTS)
         const statusMember: string = await tanyaValid("Status Member (1. Member, 2. Biasa): ", (j) => {
           const daftar: Record<string, string> = { "1": "member", "2": "biasa" };
-          Object.keys(daftar).includes(j) || gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
-          return daftar[j];
+          if (!Object.prototype.hasOwnProperty.call(daftar, j)) {
+            gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
+          }
+          return daftar[j] as string;
         });
         const pakaiVoucher: boolean = await tanyaValid("Gunakan Voucher? (1. Ada, 2. Tidak): ", (j) => {
           j === "1" || j === "2" || gagal(`Pilihan "${j}" tidak valid! Pilih 1/2.`);
