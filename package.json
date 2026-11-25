@@ -1,0 +1,18 @@
+{
+  "name": "kasir-zaynn-markett",
+  "version": "1.0.0",
+  "description": "Aplikasi console kasir ZAYNN MARKETT (UAS Pemrograman Dasar) - TypeScript",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.20.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "readline-promise": "^1.0.5"
+  }
+}
